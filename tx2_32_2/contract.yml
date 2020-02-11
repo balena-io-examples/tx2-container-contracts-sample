@@ -1,0 +1,6 @@
+type: "sw.container"
+slug: "enforce-l4t-version 32.2"
+name: "Enforce L4T Version 32.2"
+requires:
+  - type: "sw.l4t"
+    version: "32.2"
