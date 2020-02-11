@@ -1,0 +1,52 @@
+FROM balenalib/jetson-tx2-ubuntu:xenial
+
+# Prevent apt-get prompting for input
+ENV DEBIAN_FRONTEND noninteractive
+
+# Download and install BSP binaries for L4T 28.3
+RUN \
+  apt-get update && apt-get install wget bzip2 && cd /tmp/ && \
+  wget https://developer.nvidia.com/embedded/dlc/l4t-jetson-driver-package-28-3-tx2 && \
+  tar -xf l4t-jetson-driver-package-28-3-tx2 && \
+  ./Linux_for_Tegra/apply_binaries.sh -r / && \
+  rm -rf  ./Linux_for_Tegra/ && rm l4t-jetson-driver-package-28-3-tx2 && \
+  echo "/usr/lib/aarch64-linux-gnu/tegra" > /etc/ld.so.conf.d/nvidia-tegra.conf && ldconfig && \
+  ln -s /usr/lib/aarch64-linux-gnu/tegra-egl/libEGL.so.1 /usr/lib/aarch64-linux-gnu/libEGL.so.1
+
+# Install gstreamer, X and xfce
+RUN \
+  apt-get install -y --no-install-recommends gstreamer1.0-tools \
+  gstreamer1.0-alsa \
+  gstreamer1.0-plugins-base \
+  gstreamer1.0-plugins-good \
+  gstreamer1.0-plugins-bad \
+  gstreamer1.0-plugins-ugly \
+  gstreamer1.0-libav \
+  libgstreamer-plugins-good1.0-dev \
+  libgstreamer-plugins-bad1.0-dev \
+  libgstreamer1.0-dev \
+  libgstreamer-plugins-base1.0-dev && \
+  apt-get install -y --allow-downgrades libgbm1=11.2.0-1ubuntu2 && \
+  apt-get install -y --no-install-recommends \
+  gstreamer1.0-plugins-bad \
+  wget \
+  cmake \
+  xserver-xorg-input-evdev \
+  xinit \
+  xfce4 \
+  xfce4-terminal \
+  x11-xserver-utils \
+  dbus-x11 \
+  xterm
+
+ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/tegra
+ENV XFCE_PANEL_MIGRATE_DEFAULT=1
+ENV UDEV=1
+
+# Prevent screen from turning off
+RUN echo "#!/bin/bash" > /etc/X11/xinit/xserverrc \
+  && echo "" >> /etc/X11/xinit/xserverrc \
+  && echo 'exec /usr/bin/X -s 0 dpms' >> /etc/X11/xinit/xserverrc
+
+# Start XFCE desktop
+CMD ["startx"]
