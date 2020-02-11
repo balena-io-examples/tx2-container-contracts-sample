@@ -1,0 +1,15 @@
+version: '2'
+services:
+  tx2_28_3:
+    build: ./tx2_28_3
+    privileged: true
+    network_mode: host
+    labels:
+      io.balena.features.optional: 1
+  tx2_32_2:
+    build: ./tx2_32_2
+    privileged: true
+    network_mode: host
+    labels:
+      io.balena.features.optional: 1
+
